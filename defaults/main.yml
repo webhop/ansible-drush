@@ -1,0 +1,2 @@
+composer_working_dir: /usr/local/share/webhop-composer
+drush_location: /usr/local/bin/drush
