@@ -1,5 +1,4 @@
 ---
-
 - name: Create {{ composer_working_dir }}/ directory
   file: path={{ composer_working_dir }} state=directory
   become: True
@@ -10,8 +9,13 @@
 
 - name: Create symlink to the latest drush
   file:
-    src={{ composer_working_dir }}/vendor/bin/drush
-    path={{  drush_location }}
-    state=link
+    src: "{{ composer_working_dir }}/vendor/bin/drush"
+    path: "{{  drush_location }}"
+    state: link
   become: True
 
+- name: Download registry_rebuild module
+  command: "drush dl registry_rebuild --default-major=7 --yes" 
+
+- name: Clear drush cache
+  command: "drush cc drush" 
