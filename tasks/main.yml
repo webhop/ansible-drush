@@ -4,12 +4,10 @@
     path: "{{ composer_working_dir }}"
     state: directory
   become: yes
-  become_user: root
 
 - name: Install drush - {{ drush_location }}
   command: "composer require drush/drush --working-dir {{ composer_working_dir }}"
   become: yes
-  become_user: root
 
 - name: Create symlink to the latest drush
   file:
@@ -17,14 +15,3 @@
     path: "{{ drush_location }}"
     state: link
   become: yes
-  become_user: root
-
-- name: Download registry_rebuild module
-  command: "drush dl registry_rebuild --default-major=7 --yes"
-  become: yes
-  become_user: www-data
-
-- name: Clear drush cache
-  command: "drush cc drush" 
-  become: yes
-  become_user: www-data
