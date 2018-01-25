@@ -4,7 +4,7 @@
   become: True
 
 - name: Install drush - {{ drush_location }}
-  command: "composer require drush/drush --working-dir {{ composer_working_dir }}"
+  command: "composer require drush/drush:8.* --working-dir {{ composer_working_dir }}"
   become: True
 
 - name: Create symlink to the latest drush
