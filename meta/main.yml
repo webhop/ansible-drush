@@ -23,4 +23,6 @@ galaxy_info:
   categories:
     - cloud
 dependencies:
- - geerlingguy.composer
+  - name: geerlingguy.composer
+    src: https://github.com/geerlingguy/ansible-role-composer.git
+    version: 1.6.1
