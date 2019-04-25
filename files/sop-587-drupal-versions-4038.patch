@@ -1,0 +1,62 @@
+From 75a8861b4c080e489ef843cf51853401b14a35ac Mon Sep 17 00:00:00 2001
+From: Brad Jones <brad@bradjonesllc.com>
+Date: Mon, 8 Apr 2019 11:39:27 -0600
+Subject: [PATCH] Return more useful version information when not bootstrapped;
+ ensure security update is actually logical to suggest
+
+---
+ commands/pm/pm.drush.inc                    | 10 ++++++----
+ lib/Drush/UpdateService/StatusInfoDrush.php | 10 ++++++++--
+ 2 files changed, 14 insertions(+), 6 deletions(-)
+
+diff --git a/commands/pm/pm.drush.inc b/commands/pm/pm.drush.inc
+index abdbf6a215..101a327d74 100644
+--- a/commands/pm/pm.drush.inc
++++ b/commands/pm/pm.drush.inc
+@@ -1642,12 +1642,14 @@ function pm_parse_version($version, $is_core = FALSE) {
+       else {
+         $version_parts = array(
+           'version' => '',
++          // This could be incorrect (e.g., returns 2.1 and not a valid Drupal
++          // version), but keeping for BC. All other lines were historically ''.
+           'drupal_version'  => $core_parts['major'] . '.x',
+-          'project_version' => '',
+-          'version_major'   => '',
++          'project_version' => $core_parts['major'] . '.' . $core_parts['patch'],
++          'version_major'   => $core_parts['major'],
+           'version_minor'   => '',
+-          'version_patch'   => '',
+-          'version_extra'   => '',
++          'version_patch'   => $core_parts['patch'],
++          'version_extra'   => ($core_parts['patch'] == 'x') ? 'dev' : $core_parts['extra'],
+           'version_offset'  => '',
+         );
+       }
+diff --git a/lib/Drush/UpdateService/StatusInfoDrush.php b/lib/Drush/UpdateService/StatusInfoDrush.php
+index 636cae4376..0cddee5921 100644
+--- a/lib/Drush/UpdateService/StatusInfoDrush.php
++++ b/lib/Drush/UpdateService/StatusInfoDrush.php
+@@ -131,6 +131,8 @@ private function calculateUpdateStatus($available, $projects) {
+         'install_type'     => $install_type,
+         'existing_version' => $project['version'],
+         'existing_major'   => $version['version_major'],
++        'existing_minor'   => $version['version_minor'],
++        'existing_patch'   => $version['version_patch'],
+         'status'           => $project_status,
+         'datestamp'        => empty($project['datestamp']) ? NULL : $project['datestamp'],
+       );
+@@ -358,8 +360,12 @@ private function calculateProjectUpdateStatus($project_release_info, &$project_d
+     //
+ 
+     if (!empty($project_data['security updates'])) {
+-      // If we found security updates, that always trumps any other status.
+-      $project_data['status'] = DRUSH_UPDATESTATUS_NOT_SECURE;
++      foreach ($project_data['security updates'] as $securityCandidate) {
++        if ($securityCandidate['version_major'] > $existing_major || $securityCandidate['version_patch'] > $project_data['existing_patch']) {
++          // If we found security updates, that always trumps any other status.
++          $project_data['status'] = DRUSH_UPDATESTATUS_NOT_SECURE;
++        }
++      }
+     }
+ 
+     if (isset($project_data['status'])) {
