@@ -7,6 +7,12 @@
   command: "composer require drush/drush:8.* --working-dir {{ composer_working_dir }}"
   become: True
 
+- name: Patch drush for minor version support
+  patch:
+    src: sop-587-drupal-versions-4038.patch
+    basedir: "{{ composer_working_dir }}/vendor/drush/drush"
+    strip: 1
+
 - name: Create symlink to the latest drush
   file:
     src: "{{ composer_working_dir }}/vendor/bin/drush"
