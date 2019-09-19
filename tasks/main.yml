@@ -13,6 +13,12 @@
     basedir: "{{ composer_working_dir }}/vendor/drush/drush"
     strip: 1
 
+- name: Patch drush for extra-dump support
+  patch:
+    src: drush-extra-dump.patch
+    basedir: "{{ composer_working_dir }}/vendor/drush/drush"
+    strip: 1
+
 - name: Create symlink to the latest drush
   file:
     src: "{{ composer_working_dir }}/vendor/bin/drush"
